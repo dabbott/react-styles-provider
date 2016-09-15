@@ -94,12 +94,13 @@ const stylesCreator = (theme, data) => ({
 })
 
 // Select data from props to be passed to the stylesCreator.
-// The stylesCreator will only be called again if the object returned by this function changes (determined by shallow equality comparison)
+// The stylesCreator will only be called again if the object returned by this
+// function changes (determined by shallow equality comparison)
 const selectProps = (props) => ({
   type: props.type,
 })
 
-@StylesEnhancer(stylesCreator, selectProps)(Foo)
+@StylesEnhancer(stylesCreator, selectProps)
 export default class Foo extends Component {
   render() {
     const {styles} = this.props
