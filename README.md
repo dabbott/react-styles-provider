@@ -66,7 +66,7 @@ const stylesCreator = (theme) => {
 }
 
 // The prop `themes` will be available to this component
-@ThemeEnhancer(stylesCreator)
+@StylesEnhancer(stylesCreator)
 export default class Foo extends Component {
   render() {
     const {styles} = this.props
@@ -87,27 +87,25 @@ import { StylesEnhancer } from 'react-styles-provider'
 
 const stylesCreator = (theme, data) => ({
   main: {
-    color: data.hover ? 'teal' : 'blue',
+    color: data.type === 'main' ? 'green' : 'black',
     fontSize: data.type === 'warning' ? theme.warning : theme.regular,
   }
 })
 
-// Select data from your component to be passed to the stylesCreator.
+// Select data from props to be passed to the stylesCreator.
 // The stylesCreator will only be called again if the object returned by this function changes (determined by shallow comparison)
-const stylesSelector = (component) => ({
-  type: component.props.type,
-  hover: component.state.hover,
+const selectProps = (props) => ({
+  type: props.type,
 })
 
-class Foo extends Component {
+@StylesEnhancer(stylesCreator, selectProps)(Foo)
+export default class Foo extends Component {
   render() {
     const {styles} = this.props
 
     return <Text style={styles.main} />
   }
 }
-
-export default StylesEnhancer(stylesCreator)(Foo)
 ```
 
 ### Without Decorators

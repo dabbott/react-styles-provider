@@ -33,7 +33,7 @@ export default (stylesCreator, selector) => {
       const {theme} = context
 
       if (typeof selector === 'function') {
-        const selectedData = selector(this)
+        const selectedData = selector(props)
 
         if (!equal(this.selectedData, selectedData)) {
           this.selectedData = selectedData
