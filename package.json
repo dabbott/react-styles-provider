@@ -33,11 +33,11 @@
   },
   "homepage": "https://github.com/dabbott/react-styles-provider",
   "dependencies": {
-    "fast-memoize": "^2.0.2"
+    "fast-memoize": "^2.0.2",
+    "shallowequal": "^0.2.2"
   },
   "peerDependencies": {
-    "react": "14.X.X || 15.X.X",
-    "react-dom": "14.X.X || 15.X.X"
+    "react": "14.X.X || 15.X.X"
   },
   "devDependencies": {
     "babel": "^5.8.20",

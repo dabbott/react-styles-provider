@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import memoize from 'fast-memoize'
+import equal from 'shallowequal'
 
 export default (stylesCreator, selector) => {
 
@@ -14,6 +15,7 @@ export default (stylesCreator, selector) => {
     constructor(props, context) {
       super()
       this.state = this.mapContextToState(props, context)
+      this.selectedData = undefined
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
@@ -31,7 +33,13 @@ export default (stylesCreator, selector) => {
       const {theme} = context
 
       if (typeof selector === 'function') {
-        return {styles: createStyles(theme, selector(this))}
+        const selectedData = selector(this)
+
+        if (!equal(this.selectedData, selectedData)) {
+          this.selectedData = selectedData
+        }
+
+        return {styles: createStyles(theme, this.selectedData)}
       } else {
         return {styles: createStyles(theme)}
       }
