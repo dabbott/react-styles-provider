@@ -10,10 +10,6 @@ export default class extends Component {
     return {theme: this.props.theme}
   }
 
-  shouldComponentUpdate(nextProps) {
-    return this.props.theme !== nextProps.theme
-  }
-
   render() {
     return this.props.children
   }
