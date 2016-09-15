@@ -65,7 +65,8 @@ const stylesCreator = (theme) => {
   }
 }
 
-// The prop `styles` will be available to this component
+// The prop `styles` will be available to this component,
+// containing the object returned from the stylesCreator
 @StylesEnhancer(stylesCreator)
 export default class Foo extends Component {
   render() {
@@ -78,7 +79,7 @@ export default class Foo extends Component {
 
 ## Other / Advanced Usage
 
-### Styles based on component state/props
+### Styles based on component `props`
 
 ```js
 import React, { Component } from 'react'
@@ -93,7 +94,7 @@ const stylesCreator = (theme, data) => ({
 })
 
 // Select data from props to be passed to the stylesCreator.
-// The stylesCreator will only be called again if the object returned by this function changes (determined by shallow comparison)
+// The stylesCreator will only be called again if the object returned by this function changes (determined by shallow equality comparison)
 const selectProps = (props) => ({
   type: props.type,
 })
