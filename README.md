@@ -15,7 +15,7 @@ npm install --save react-styles-provider
 
 Wrap the top level component, or any component whose descendants should be styled, in the `<StylesProvider>`. Pass a theme (an arbitrary value of your choosing) to this provider, which will be used to build styles.
 
-The theme can be changed at any time and the styles will be recomputed for your entire app - but don't worry, styles are memoized per theme, so there isn't a big performance impact due to recomputing styles.
+The theme can be changed at any time and the styles will be recomputed for your entire app - but don't worry, styles are memoized per theme (themes are compared with `===`), so there isn't a big performance impact due to recomputing styles.
 
 ```js
 import React, { Component } from 'react'
@@ -65,7 +65,7 @@ const stylesCreator = (theme) => {
   }
 }
 
-// The prop `themes` will be available to this component
+// The prop `styles` will be available to this component
 @StylesEnhancer(stylesCreator)
 export default class Foo extends Component {
   render() {
