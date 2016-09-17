@@ -33,7 +33,11 @@ export default (stylesCreator, selector) => {
       const {theme} = context
 
       if (typeof selector === 'function') {
-        const selectedData = selector(props)
+
+        // TODO Handle getDefaultProps() for classic React?
+        const defaultProps = WrappedComponent.defaultProps
+
+        const selectedData = selector({...defaultProps, ...props})
 
         if (!equal(this.selectedData, selectedData)) {
           this.selectedData = selectedData
