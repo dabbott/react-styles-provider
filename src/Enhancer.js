@@ -2,7 +2,13 @@ import React, { Component, PropTypes } from 'react'
 import memoize from 'fast-memoize'
 import equal from 'shallowequal'
 
-export default (stylesCreator, selector) => {
+const defaultOptions = {
+  withRef: false,
+}
+
+export default (stylesCreator, selector, options) => {
+
+  options = options ? {...defaultOptions, ...options} : defaultOptions
 
   const createStyles = memoize(stylesCreator)
 
@@ -49,12 +55,22 @@ export default (stylesCreator, selector) => {
       }
     }
 
+    getWrappedInstance() {
+      return this.refs.wrappedInstance
+    }
+
     render() {
       const {styles} = this.state
 
-      return (
+      const element = (
         <WrappedComponent styles={styles} {...this.props} />
       )
+
+      if (options.withRef) {
+        return React.cloneElement(element, {ref: 'wrappedInstance'})
+      } else {
+        return element
+      }
     }
   }
 }
