@@ -1,16 +1,18 @@
 import React, { Component, PropTypes } from 'react'
-import memoize from 'fast-memoize'
+// import memoize from 'fast-memoize'
 import equal from 'shallowequal'
+
+import resolve from './resolve'
 
 const defaultOptions = {
   withRef: false,
 }
 
-export default (stylesCreator, selector, options) => {
+export default (stylesCreator, options) => {
 
   options = options ? {...defaultOptions, ...options} : defaultOptions
 
-  const createStyles = memoize(stylesCreator)
+  const createStyles = params => resolve(stylesCreator, params)
 
   return (WrappedComponent) => class extends Component {
 
@@ -20,54 +22,38 @@ export default (stylesCreator, selector, options) => {
 
     constructor(props, context) {
       super()
-      this.selectedProps = this.selectProps(props)
-      this.state = this.mapContextToState(props, context)
+
+      this.state = this.buildState(props, context)
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-      const nextSelectedProps = this.selectProps(nextProps)
-
       if (
         nextContext.theme !== this.context.theme ||
-        nextSelectedProps !== this.selectedProps
+        !equal(nextProps, this.props)
       ) {
-        this.selectedProps = nextSelectedProps
-        this.setState(this.mapContextToState(nextProps, nextContext))
+        this.setState(this.buildState(nextProps, nextContext))
       }
 
       // Update all styles on HMR regardless of theme change
       if (module.hot) {
-        this.selectedProps = nextSelectedProps
-        this.setState(this.mapContextToState(nextProps, nextContext))
+        this.setState(this.buildState(nextProps, nextContext))
       }
     }
 
-    mapContextToState(props, context) {
+    buildState(props, context) {
+      const getStyles = this.buildStyles.bind(this, props, context)
+
+      return {styles: getStyles(), getStyles}
+    }
+
+    buildStyles(props, context, custom = null) {
       const {theme} = context
-
-      if (typeof selector === 'function') {
-        return {styles: createStyles(theme, this.selectedProps)}
-      } else {
-        return {styles: createStyles(theme)}
-      }
-    }
-
-    selectProps(props) {
-      if (typeof selector !== 'function') return undefined
 
       // TODO Handle getDefaultProps() for classic React?
       const defaultProps = WrappedComponent.defaultProps
+      const mergedProps = {...defaultProps, ...props}
 
-      const selectedProps = selector({...defaultProps, ...props})
-
-      // If equal, return the old selection
-      if (equal(this.selectedProps, selectedProps)) {
-        return this.selectedProps
-
-      // Else, return the new selection
-      } else {
-        return selectedProps
-      }
+      return createStyles({props: mergedProps, theme, ...custom})
     }
 
     getWrappedInstance() {
@@ -75,10 +61,14 @@ export default (stylesCreator, selector, options) => {
     }
 
     render() {
-      const {styles} = this.state
+      const {styles, getStyles} = this.state
 
       const element = (
-        <WrappedComponent styles={styles} {...this.props} />
+        <WrappedComponent
+          styles={styles}
+          getStyles={getStyles}
+          {...this.props}
+        />
       )
 
       if (options.withRef) {
