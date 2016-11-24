@@ -35,6 +35,7 @@
   "homepage": "https://github.com/dabbott/react-styles-provider",
   "dependencies": {
     "fast-memoize": "^2.0.2",
+    "inline-style-prefixer": "^2.0.4",
     "shallowequal": "^0.2.2"
   },
   "peerDependencies": {
@@ -44,6 +45,7 @@
     "babel-cli": "^6.18.0",
     "babel-core": "^6.18.2",
     "babel-preset-react": "^6.16.0",
+    "babel-preset-es2015": "^6.18.0",
     "babel-preset-stage-0": "^6.16.0",
     "eslint": "^1.0.0",
     "eslint-config-airbnb": "2.1.1",

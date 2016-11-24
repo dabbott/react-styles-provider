@@ -12,7 +12,7 @@ export default (stylesCreator, options) => {
 
   options = options ? {...defaultOptions, ...options} : defaultOptions
 
-  const createStyles = params => resolve(stylesCreator, params)
+  const createStyles = params => resolve({}, stylesCreator, params)
 
   return (WrappedComponent) => class extends Component {
 

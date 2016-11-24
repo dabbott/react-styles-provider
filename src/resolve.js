@@ -1,22 +1,40 @@
 
-const type = (x) => ({}).toString.call(x).slice(8, -1)
+import arrayResolver from './resolvers/array'
+import typeResolver from './resolvers/type'
+import objectResolver from './resolvers/object'
+import functionResolver from './resolvers/function'
 
-const resolve = (x, ...params) => {
-  switch (type(x)) {
+import flattenArray from './transformers/flattenArray'
+import prefix from './transformers/prefix'
 
-    case 'Function':
-      return resolve(x(...params))
+export default (config, x, ...params) => {
 
-    case 'Object':
-      return Object.keys(x).reduce((acc, key) => {
-        acc[key] = resolve(x[key], ...params)
+  let {resolvers = [], transformers = []} = config
 
-        return acc
-      }, {})
+  resolvers = [typeResolver, objectResolver, functionResolver, arrayResolver, ...resolvers]
+  transformers = [flattenArray, prefix, ...transformers]
 
-    default:
-      return x
+  const globals = {}
+
+  const resolve = (x, ...params) => {
+    const context = {globals, locals: {}}
+
+    const resolved = resolvers.reduce((result, plugin, i, list) => {
+      return plugin(resolve, context, result, ...params)
+    }, x)
+
+    // console.log('resolved', resolved)
+
+    const transformed = transformers.reduce((result, plugin, i, list) => {
+      return plugin(context, result, ...params)
+    }, resolved)
+
+    // console.log('transformers', transformed)
+
+    return transformed
   }
-}
 
-export default resolve
+  // console.log('results', resolve(x, ...params))
+
+  return resolve(x, ...params)
+}
