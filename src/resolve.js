@@ -1,18 +1,30 @@
 
-import arrayResolver from './resolvers/array'
-import typeResolver from './resolvers/type'
-import objectResolver from './resolvers/object'
-import functionResolver from './resolvers/function'
+const type = (x) => ({}).toString.call(x).slice(8, -1)
 
-import flattenArray from './transformers/flattenArray'
-import prefix from './transformers/prefix'
+const res = (x, ...params) => {
+  switch (type(x)) {
+
+    case 'Function':
+      return res(x(...params), ...params)
+
+    case 'Object':
+      return Object.keys(x).reduce((acc, key) => {
+        acc[key] = res(x[key], ...params)
+
+        return acc
+      }, {})
+
+    case 'Array':
+      return x.map(obj => res(obj, ...params))
+
+    default:
+      return x
+  }
+}
 
 export default (config, x, ...params) => {
 
   let {resolvers = [], transformers = []} = config
-
-  resolvers = [typeResolver, objectResolver, functionResolver, arrayResolver, ...resolvers]
-  transformers = [flattenArray, prefix, ...transformers]
 
   const globals = {}
 

@@ -4,17 +4,34 @@ import equal from 'shallowequal'
 
 import resolve from './resolve'
 
+import arrayResolver from './resolvers/array'
+import typeResolver from './resolvers/type'
+import objectResolver from './resolvers/object'
+import functionResolver from './resolvers/function'
+
+import flattenArray from './transformers/flattenArray'
+import prefix from './transformers/prefix'
+
+import WindowDimensions from './enhancers/WindowDimensions'
+
 const defaultOptions = {
   withRef: false,
+  resolvers: [typeResolver, objectResolver, functionResolver, arrayResolver],
+  transformers: [flattenArray, prefix],
 }
 
 export default (stylesCreator, options) => {
 
-  options = options ? {...defaultOptions, ...options} : defaultOptions
+  options = options ? {
+    ...defaultOptions,
+    ...options,
+    resolvers: [...defaultOptions.resolvers, ...options.resolvers],
+    transformers: [...defaultOptions.transformers, ...options.transformers],
+  } : defaultOptions
 
-  const createStyles = params => resolve({}, stylesCreator, params)
+  const createStyles = params => resolve(options, stylesCreator, params)
 
-  return (WrappedComponent) => class extends Component {
+  return (WrappedComponent) => WindowDimensions(class extends Component {
 
     static contextTypes = {
       theme: PropTypes.object,
@@ -63,6 +80,8 @@ export default (stylesCreator, options) => {
     render() {
       const {styles, getStyles} = this.state
 
+      console.log('props', this.props)
+
       const element = (
         <WrappedComponent
           styles={styles}
@@ -77,5 +96,5 @@ export default (stylesCreator, options) => {
         return element
       }
     }
-  }
+  })
 }
