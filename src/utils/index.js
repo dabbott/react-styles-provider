@@ -1,3 +1,4 @@
 export { default as type } from './type'
-export { default as applyTransformations } from './applyTransformations'
-export { default as resolveFunctions } from './resolveFunctions'
+export applyTransformations from './applyTransformations'
+export resolveFunctions from './resolveFunctions'
+export omit from './omit'
