@@ -1,2 +1,2 @@
-export StylesEnhancer from './Enhancer'
-export StylesProvider from './Provider'
+export default from './Enhancer'
+export { default as WindowDimensionsEnhancer } from './enhancers/WindowDimensions'
