@@ -1,4 +1,4 @@
 export { default as type } from './type'
 export applyTransformations from './applyTransformations'
-export resolveFunctions from './resolveFunctions'
+export mapRecursive from './mapRecursive'
 export omit from './omit'

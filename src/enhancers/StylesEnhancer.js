@@ -3,15 +3,22 @@ import React, { Component } from 'react'
 import equal from 'shallowequal'
 import { context } from 'react-ctx'
 
-import { resolveFunctions, applyTransformations, omit } from '../utils'
+import { applyTransformations, omit } from '../utils'
 import { contextTypes, contextNamespace } from '../constants'
 
-import flattenArray from '../transformations/flattenArray'
-import prefix from '../transformations/prefix'
+import resolveFunctions from '../transformations/resolveFunctions'
+import prefixStyles from '../transformations/prefixStyles'
+import flattenArrays from '../transformations/flattenArrays'
+import replaceReferences from '../transformations/replaceReferences'
 
 const defaultOptions = {
   withRef: false,
-  transformations: [flattenArray, prefix],
+  transformations: [
+    resolveFunctions,
+    prefixStyles,
+    replaceReferences,
+    flattenArrays,
+  ],
 }
 
 export default (stylesCreator, options) => {
@@ -66,14 +73,18 @@ export default (stylesCreator, options) => {
         // Delete customStyleParams, which came from context
         delete mergedProps.customStyleParams
 
-        const resolvedStyles = resolveFunctions(stylesCreator, mergedProps, mergedCustom)
+        // console.log('stylesCreator', stylesCreator)
 
-        return applyTransformations(
+        const result = applyTransformations(
           options.transformations,
-          resolvedStyles,
+          stylesCreator,
           mergedProps,
           mergedCustom
         )
+
+        // console.log('resulting styles', result)
+
+        return result
       }
 
       getWrappedInstance() {
