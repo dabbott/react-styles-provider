@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 // import memoize from 'fast-memoize'
 import equal from 'shallowequal'
 import { context } from 'react-ctx'
