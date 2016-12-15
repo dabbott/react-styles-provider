@@ -3,7 +3,7 @@ react-styles-provider
 
 [![npm version](https://img.shields.io/npm/v/react-styles-provider.svg?style=flat-square)](https://www.npmjs.com/package/react-styles-provider)
 
-Higher order component for providing themes & styles to a React or React Native app.
+Powerful, dynamic styles for React and React Native.
 
 ```js
 npm install --save react-styles-provider
@@ -11,121 +11,223 @@ npm install --save react-styles-provider
 
 ## Usage
 
-### Step 1: Provide the theme
+### 1. Passing styles to components
 
-Wrap the top level component, or any component whose descendants should be styled, in the `<StylesProvider>`. Pass a theme (an arbitrary value of your choosing) to this provider, which will be used to build styles.
-
-The theme can be changed at any time and the styles will be recomputed for your entire app - but don't worry, styles are memoized per theme (themes are compared with `===`), so there isn't a big performance impact due to recomputing styles.
+Use the `createStyles` decorator to provide a `styles` prop to the component.
 
 ```js
 import React, { Component } from 'react'
-import { StylesProvider } from 'react-styles-provider'
+import createStyles from 'react-styles-provider'
 
-// Themes can be any value (object, array, function, whatever)
-const myTheme = {
-  colors: {
-    text: 'red',
-    background: 'blue',
+@createStyles({
+  container: {
+    padding: 20,
+    backgroundColor: 'whitesmoke',
   },
-  fonts: {
-    regular: {
-      fontSize: 13,
-      fontFamily: "Helvetica",
-    }
-  }
-}
-
-// Any children of App will be able to use the provided theme
-export default class App extends Component {
+  text: {
+    color: 'black',
+  },
+})
+export default class HelloButton extends Component {
   render() {
-    <StylesProvider theme={myTheme}>
-      {this.props.children}
-    </StylesProvider>
+    const {styles} = this.props
+
+    return (
+      <div style={styles.container}>
+        <span style={styles.text}>
+          Hello World
+        </span>
+      </div>
+    )
   }
 }
 ```
 
-### Step 2: Create your styles
+### 2. Compute styles based on props
+
+At any place in the `createStyles` call, you may use a function, which takes props as a parameter.
+
+##### Compute a single value from props
+
+```js
+@createStyles({
+  container: {
+    padding: 20,
+    backgroundColor: props => props.error ? 'red' : 'whitesmoke',
+  },
+  text: {
+    color: 'black',
+  },
+})
+```
+
+##### Compute a style object from props
+
+```js
+@createStyles({
+  container: props => ({
+    padding: props.large ? 40 : 20,
+    backgroundColor: props.error ? 'red' : 'whitesmoke',
+  }),
+  text: {
+    color: 'black',
+  },
+})
+```
+
+##### Compute all style objects from props
+
+```js
+@createStyles(props => ({
+  container: {
+    padding: props.large ? 40 : 20,
+    backgroundColor: props.error ? 'red' : 'whitesmoke',
+  },
+  text: {
+    color: props.error ? 'white' : 'black',
+  },
+}))
+```
+
+### 3. Compute styles based on state
+
+The `createStyles` decorator also adds a `getStyles` prop to the component. Calling `getStyles(state)` runs any functions in `createStyles` with `state` as the second parameter.
 
 ```js
 import React, { Component } from 'react'
-import { Text } from 'react-native'
-import { StylesEnhancer } from 'react-styles-provider'
+import createStyles from 'react-styles-provider'
 
-// This function will be called whenever the theme changes
-// to provide a `styles` prop to the component
-const stylesCreator = (theme) => {
-  const {colors, fonts} = theme
+@createStyles({
+  container: {
+    padding: 20,
+    backgroundColor: 'whitesmoke',
+  },
+  text: {
+    color: (props, state) => state.hover ? 'grey' : 'black',
+  },
+})
+export default class HelloButton extends Component {
+
+  state = {
+    hover: false,
+  }
+
+  render() {
+    const {getStyles} = this.props
+    const styles = getStyles(this.state)
+
+    return (
+      <div
+        style={styles.container}
+        onMouseEnter={() => this.setState({hover: true})}
+        onMouseLeave={() => this.setState({hover: false})}
+      >
+        <span style={styles.text}>
+          Hello World
+        </span>
+      </div>
+    )
+  }
+}
+```
+
+### 4. Style arrays (same behavior as React Native)
+
+```js
+@createStyles(props => {
+
+  // Extended by both container and text
+  const base = {
+    margin: 30,
+    backgroundColor: props.error ? 'red' : 'whitesmoke',
+  }
 
   return {
-    main: {
-      color: colors.text,
-      ...fonts.regular,
-    },
+    container: [
+      base,
+      {padding: props.large ? 40 : 20}
+    ],
+    text: [
+      base,
+      {color: props.error ? 'white' : 'black'}
+    ],  
   }
+})
+```
+
+### 5. Responsive helpers (React web only, for now)
+
+The `responsive` decorator adds a responsive prop to your component, which can be used both to create style objects and in the render function.
+
+```js
+import React, { Component } from 'react'
+import { ResponsiveProvider } from 'react-styles-provider'
+
+// Choose how to define the `responsive` prop. In this case, we'll define it as
+// a string like, "small-mobile" or "large-desktop". This gets called every time
+// window dimensions change.
+const calculateResponsiveBreakpoints = ({width, height, isMobile}) => {
+  const attributes = []
+
+  if (width > 1280) {
+    attributes.push('large')
+  } else if (width > 800) {
+    attributes.push('medium')
+  } else {
+    attributes.push('small')
+  }
+
+  if (isMobile) {
+    attributes.push('mobile')
+  } else {
+    attributes.push('desktop')
+  }
+
+  return attributes.join('-')
 }
 
-// The prop `styles` will be available to this component,
-// containing the object returned from the stylesCreator
-@StylesEnhancer(stylesCreator)
-export default class Foo extends Component {
+// Pass our responsive calculation function to ResponsiveProvider to make the
+// `responsive` prop available to descendant components
+export default class App extends Component {
   render() {
-    const {styles} = this.props
-
-    return <Text style={styles.main} />
+    return (
+      <ResponsiveProvider set={calculateResponsiveBreakpoints}>
+        <HelloButton />
+      </ResponsiveProvider>
+    )
   }
 }
 ```
 
-## Other / Advanced Usage
-
-### Styles based on component `props`
-
 ```js
 import React, { Component } from 'react'
-import { Text } from 'react-native'
-import { StylesEnhancer } from 'react-styles-provider'
+import { responsive } from 'react-styles-provider'
 
-const stylesCreator = (theme, data) => ({
-  main: {
-    color: data.type === 'main' ? 'green' : 'black',
-    fontSize: data.type === 'warning' ? theme.warning : theme.regular,
-  }
+@responsive()
+@createStyles({
+  container: {
+    padding: 20,
+    backgroundColor: 'whitesmoke',
+    width: props => props.responsive.match('small|mobile') ? 300 : 600,
+  },
+  text: {
+    color: 'black',
+  },
 })
-
-// Select data from props to be passed to the stylesCreator.
-// The stylesCreator will only be called again if the object returned by this
-// function changes (determined by shallow equality comparison)
-const selectProps = (props) => ({
-  type: props.type,
-})
-
-@StylesEnhancer(stylesCreator, selectProps)
-export default class Foo extends Component {
+export default class HelloButton extends Component {
   render() {
-    const {styles} = this.props
+    const {style, responsive} = this.props
 
-    return <Text style={styles.main} />
+    return (
+      <div style={styles.container}>
+        <span style={styles.text}>
+          Hello World
+        </span>
+        {responsive.match('mobile') && (
+          <span>On Mobile</span>
+        )}
+      </div>
+    )
   }
 }
-```
-
-### Without Decorators
-
-```js
-import React, { Component } from 'react'
-import { Text } from 'react-native'
-import { StylesEnhancer } from 'react-styles-provider'
-
-const stylesCreator = (theme) => { return ... }
-
-class Foo extends Component {
-  render() {
-    const {styles} = this.props
-
-    return <Text style={styles.main} />
-  }
-}
-
-export default StylesEnhancer(stylesCreator)(Foo)
 ```
