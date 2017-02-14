@@ -1,6 +1,6 @@
 {
   "name": "react-styles-provider",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Provide themed styles to your entire React app in a performant way.",
   "main": "lib/index.js",
   "files": [
