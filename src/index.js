@@ -1,4 +1,4 @@
-export default from './enhancers/stylesEnhancer'
+export default from './enhancers/StylesEnhancer'
 export { default as windowDimensions } from './enhancers/WindowDimensions'
 export { default as responsive } from './enhancers/responsive'
 
