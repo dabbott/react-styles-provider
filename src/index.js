@@ -1,5 +1,5 @@
 export default from './enhancers/stylesEnhancer'
-export { default as windowDimensions } from './enhancers/windowDimensions'
+export { default as windowDimensions } from './enhancers/WindowDimensions'
 export { default as responsive } from './enhancers/responsive'
 
 export { default as StylesProvider } from './components/StylesProvider'

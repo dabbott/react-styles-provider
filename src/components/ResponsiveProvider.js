@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { MapPropsToContext } from 'react-ctx'
 
-import windowDimensions from '../enhancers/windowDimensions'
+import windowDimensions from '../enhancers/WindowDimensions'
 
 // Primitive mobile detection
 const detectMobile = () =>
